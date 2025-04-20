@@ -1,15 +1,53 @@
 import React, { useState } from 'react';
 import './RegisterPage.css';
+import { urlConfig } from '../../config'; // Task 1
+import { useAppContext } from '../../context/AuthContext'; // Task 2
+import { useNavigate } from 'react-router-dom'; // Task 3
 
 function RegisterPage() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showerr, setShowerr] = useState(''); // Task 4
+
+    const navigate = useNavigate(); // Task 5
+    const { setIsLoggedIn } = useAppContext(); // Task 5
 
     const handleRegister = async () => {
-        console.log("Register invoked");
-        console.log({ firstName, lastName, email, password });
+        try {
+            const response = await fetch(`${urlConfig.backendUrl}/api/auth/register`, {
+                method: 'POST', // Task 6
+                headers: {
+                    'content-type': 'application/json', // Task 7
+                },
+                body: JSON.stringify({ // Task 8
+                    firstName,
+                    lastName,
+                    email,
+                    password
+                })
+            });
+
+            const json = await response.json(); // Step 2 - Task 1
+            console.log('json data', json);
+
+            if (json.authtoken) {
+                sessionStorage.setItem('auth-token', json.authtoken); // Step 2 - Task 2
+                sessionStorage.setItem('name', firstName);
+                sessionStorage.setItem('email', json.email);
+                setIsLoggedIn(true); // Step 2 - Task 3
+                navigate('/app'); // Step 2 - Task 4
+            }
+
+            if (json.error) {
+                setShowerr(json.error); // Step 2 - Task 5
+            }
+
+        } catch (e) {
+            console.log("Error fetching details: " + e.message);
+            setShowerr('Registration failed. Please try again.');
+        }
     };
 
     return (
@@ -53,6 +91,8 @@ function RegisterPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
+                            {/* Step 2 - Task 6 */}
+                            <div className="text-danger">{showerr}</div>
                         </div>
 
                         <div className="mb-4">
