@@ -11,7 +11,7 @@ import './App.css';
 import Navbar from './components/Navbar/Navbar';
 
 function App() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // ❌ Línea que genera warning y rompe el build
 
   return (
     <>
